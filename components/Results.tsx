@@ -22,7 +22,7 @@ export default function Results({latLon}: {latLon: {lat: string, lon: string} | 
         </div>    
           
             
-        <div className="w-full flex-1 items-start flex bg-gray-100">
+        <div className="items-start justify-center flex">
         {latLon?.lat && latLon?.lon && (
           <Map key={`${latLon.lat}-${latLon.lon}`} lat={latLon.lat} lon={latLon.lon} />
         )}
