@@ -5,12 +5,17 @@ import { use } from 'react'
 
 import Address from "@/components/Address";
 import Results from "@/components/Results";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const { lat: initialLat, lon: initialLon } = use(searchParams);
   console.log({initialLat, initialLon});
   const [latLon, setLatLon] = useState<{lat: string, lon: string} | null>(null);
-  
+
+  // get initial address server side, same with lat and lon
+
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex flex-1 w-full max-w-7xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
