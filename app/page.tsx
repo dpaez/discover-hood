@@ -1,35 +1,22 @@
-"use client";
 
-import { useState } from "react";
-import { use } from 'react'
+import Home from "@/components/Home";
+import { reverseGeocode } from "@/lib/reverse";
 
-import Address from "@/components/Address";
-import Results from "@/components/Results";
-import useSWR from "swr";
+export default async function Page({ searchParams }: {
+  searchParams: Promise<{ lat?: string; lon?: string }>;
+}) {
+  const { lat: initialLat, lon: initialLon } = await searchParams;
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const hasCoords = initialLat && initialLon && Number.isFinite(Number(initialLat)) && Number.isFinite(Number(initialLon));
 
-export default function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const { lat: initialLat, lon: initialLon } = use(searchParams);
-  console.log({initialLat, initialLon});
-  const [latLon, setLatLon] = useState<{lat: string, lon: string} | null>(null);
-
-  // get initial address server side, same with lat and lon
+ const initialAddress = hasCoords
+    ? await reverseGeocode(initialLat, initialLon)
+    : null;
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-7xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <div className="flex flex-col items-center gap-6 text-center w-full">
-          <h1 className="text-5xl mb-4 font-semibold font-heading leading-10 tracking-tight text-black dark:text-zinc-50">
-            Address Insights
-          </h1>
-          <Address setLatLon={setLatLon} initialLat={initialLat || undefined} initialLon={initialLon || undefined} />
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
-            Discover your neighborhood&apos;s hidden gems
-          </p>
-        </div> 
-        <Results latLon={latLon} />
-      </main>
+    <div className="flex flex-col items-center justify-center p-2 lg:p-8">
+      <h1 className="text-4xl font-bold">Address Insights</h1>
+      <Home initialLat={initialLat} initialLon={initialLon} initialAddress={initialAddress?.display_name} />
     </div>
   );
 }
