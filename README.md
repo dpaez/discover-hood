@@ -27,16 +27,15 @@ Another useful improvement with AI was to review and audit `a11y`. This was part
 
 ## Development
 
-First, run the development server:
+- Install everything. The project is using pnpm.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm i
 ```
+- Then you can run the dev server
+```bash
+pnpm run dev
+```
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
