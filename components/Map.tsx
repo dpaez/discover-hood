@@ -1,13 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import {
   Map as LibreMap,
   Marker,
-  Popup,
-  NavigationControl,
-  FullscreenControl,
-  ScaleControl,
-  GeolocateControl
+  Popup
 } from 'react-map-gl/maplibre';import { setWorkerUrl } from "maplibre-gl";
 import { Flag, Footprints, Car } from 'lucide-react';
 import { NearbyResponse } from '@/app/types';
@@ -16,13 +13,19 @@ import { NearbyResponse } from '@/app/types';
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
 export default function Map({ lat, lon, walkingAmenities = [], drivingAmenities = [] }: { lat: string; lon: string; walkingAmenities: NearbyResponse[]; drivingAmenities: NearbyResponse[]; }) {
+  const [popupInfo, setPopupInfo] = useState(null);
 
   const walkingMarkers = walkingAmenities.map((amenity) => (
     <Marker 
       key={`footprints-${amenity.lat}-${amenity.lon}`} 
       longitude={parseFloat(amenity.lon)} 
       latitude={parseFloat(amenity.lat)} 
-      anchor="bottom">
+      anchor="bottom"
+      onClick={e => {
+        e.originalEvent.stopPropagation();
+        setPopupInfo(amenity);
+      }}
+      >
       <Footprints className="fill-amber-600 stroke-amber-600" />
     </Marker>
   ));
@@ -32,7 +35,12 @@ export default function Map({ lat, lon, walkingAmenities = [], drivingAmenities 
       key={`car-${amenity.lat}-${amenity.lon}`} 
       longitude={parseFloat(amenity.lon)} 
       latitude={parseFloat(amenity.lat)} 
-      anchor="bottom">
+      anchor="bottom"
+      onClick={e => {
+        e.originalEvent.stopPropagation();
+        setPopupInfo(amenity);
+      }}
+      >
       <Car className="fill-indigo-300 stroke-indigo-300" />
     </Marker>
   ));
@@ -61,6 +69,21 @@ export default function Map({ lat, lon, walkingAmenities = [], drivingAmenities 
       mapStyle={`https://tiles.locationiq.com/v3/streets/vector.json?key=${process.env.NEXT_PUBLIC_MAPTILER_ACCESS_TOKEN}`}
     >
       {markers}
+
+      {popupInfo && (
+        <Popup
+          anchor="top"
+          longitude={Number(popupInfo.lon)}
+          latitude={Number(popupInfo.lat)}
+          onClose={() => setPopupInfo(null)}
+        >
+          <div>
+            <h4 className="text-lg font-heading">{popupInfo?.name}</h4>
+            <p className="text-sm text-muted-foreground capitalize font-bold font-mono">{popupInfo.type}</p>
+            <p className="text-sm text-muted-foreground">{popupInfo?.display_name}</p>
+          </div>
+        </Popup>
+      )}
     </LibreMap>
   );
 }
