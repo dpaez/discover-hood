@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint app/**/*.tsx",
-    "lint:fix": "eslint --fix app/**/*.tsx",
+    "lint": "eslint app components lib",
+    "lint:fix": "eslint --fix app components lib",
     "test": "pnpm exec playwright test",
     "postinstall": "cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs public/maplibre-gl-worker.mjs && cp node_modules/maplibre-gl/dist/maplibre-gl-shared.mjs public/maplibre-gl-shared.mjs"
   },

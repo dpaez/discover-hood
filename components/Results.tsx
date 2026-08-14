@@ -24,7 +24,7 @@ export default function Results({
 }) {
   const [isCopied, setIsCopied] = useState(false);
   // only call if lat and lon are defined
-  const { data, error, isLoading } = useSWR(latLon?.lat ? `/api/scores?lat=${latLon?.lat}&lon=${latLon?.lon}` : null, fetcher);
+  const { data } = useSWR(latLon?.lat ? `/api/scores?lat=${latLon?.lat}&lon=${latLon?.lon}` : null, fetcher);
  
   return (
     <Suspense fallback={<Skeleton className="size-48 animate-pulse" />}>
