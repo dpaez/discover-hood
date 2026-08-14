@@ -6,15 +6,18 @@ import { SWRConfig } from 'swr'
 
 import Address from "@/components/Address";
 import Results from "@/components/Results";
+import type { PopularAddress } from "@/lib/popular-addresses";
 
 export default function Home({
   initialLat,
   initialLon,
   initialAddress,
+  popularAddresses,
 }: {
   initialLat?: string;
   initialLon?: string;
   initialAddress?: string;
+  popularAddresses: PopularAddress[];
 }) {
   const [latLon, setLatLon] = useState(
     initialLat && initialLon
@@ -37,7 +40,7 @@ export default function Home({
           initialLon={initialLon}
           initialAddress={initialAddress}
         />
-        <Results latLon={latLon} />
+        <Results latLon={latLon} popularAddresses={popularAddresses} />
       </main>
     </SWRConfig>
   );

@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useSWR from "swr";
 
 
+import type { PopularAddress } from "@/lib/popular-addresses";
+
 import Score from "./Score";
 import Map from "./Map";
 import History from "./History";
@@ -13,7 +15,13 @@ import PopularAddresses from "./PopularAddresses";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function Results({latLon}: {latLon: {lat: string, lon: string} | null}) {
+export default function Results({
+  latLon,
+  popularAddresses,
+}: {
+  latLon: { lat: string; lon: string } | null;
+  popularAddresses: PopularAddress[];
+}) {
   // only call if lat and lon are defined
   const { data, error, isLoading } = useSWR(latLon?.lat ? `/api/scores?lat=${latLon?.lat}&lon=${latLon?.lon}` : null, fetcher);
  
@@ -37,7 +45,7 @@ export default function Results({latLon}: {latLon: {lat: string, lon: string} | 
 
         <div className="order-3 lg:order-3 flex flex-col gap-6">
           <History />
-          <PopularAddresses />
+          <PopularAddresses addresses={popularAddresses} />
         </div>
       </div>
     </Suspense>
