@@ -13,7 +13,7 @@ import { NearbyResponse } from '@/app/types';
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
 export default function Map({ lat, lon, walkingAmenities = [], drivingAmenities = [] }: { lat: string; lon: string; walkingAmenities: NearbyResponse[]; drivingAmenities: NearbyResponse[]; }) {
-  const [popupInfo, setPopupInfo] = useState(null);
+  const [popupInfo, setPopupInfo] = useState<NearbyResponse | null>(null);
 
   const walkingMarkers = walkingAmenities.map((amenity) => (
     <Marker 
