@@ -41,9 +41,9 @@ export default function Page({
 }) {
   return (
     <div className="flex flex-col items-center justify-center p-2 lg:p-8">
-      <h1 className="text-4xl font-bold">Address Insights</h1>
-      <p className="text-sm text-muted-foreground">
-        Find hidden gems in your neighborhood 💎
+      <h1 className="text-4xl lg:text-6xl text-center font-heading">Address Insights</h1>
+      <p className="text-sm lg:text-md mt-2 text-center text-muted-foreground italic font-sans">
+        Find hidden gems in your neighborhood <span className="text-pink-500 not-italic">💎</span>
       </p>
       <Suspense fallback={<div className="p-8 text-muted-foreground">Loading…</div>}>
         <HomeWithLocation searchParams={searchParams} />

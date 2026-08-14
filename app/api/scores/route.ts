@@ -34,8 +34,10 @@ const DRIVING_WEIGHTS: Record<string, number> = {
   supermarket: 1.5,
   school: 1.5,
   bank: 1.0,
-  parking: 0.8,
-  stadium: 1.0,
+  parking: 1.6,
+  stadium: 1.2,
+  bus_station: 1.2,
+  train_station: 1.2,
 };
 
 const WALKING_SATURATION = 12;
@@ -1964,17 +1966,25 @@ const getUrbanIndex = (
   const walkParks = walkingAmenities.filter((p) =>
     ["park", "playground"].includes(p.type),
   ).length;
+  const mobilityStations = walkingAmenities.filter(
+    (p) => ["bus_station", "train_station"].includes(p.type),
+  ).length;
   const driveHospitals = drivingAmenities.filter(
     (p) => p.type === "hospital",
   ).length;
   const driveGroceries = drivingAmenities.filter(
     (p) => p.type === "supermarket",
   ).length;
+  const driveCinemas = drivingAmenities.filter(
+    (p) => p.type === "cinema",
+  ).length;
 
   urban += Math.min(walkCafes, 3) * 2;
   urban += Math.min(walkParks, 2) * 3;
+  urban += Math.min(mobilityStations, 2) * 3;
   urban += Math.min(driveHospitals, 2) * 4;
   urban += Math.min(driveGroceries, 2) * 3;
+  urban += Math.min(driveCinemas, 2) * 3;
 
   return Math.max(1, Math.min(100, Math.round(urban)));
 };
