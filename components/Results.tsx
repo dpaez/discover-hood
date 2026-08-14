@@ -1,13 +1,13 @@
 "use client"
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import useSWR from "swr";
 
 
 import type { PopularAddress } from "@/lib/popular-addresses";
-
+import { Button } from "@/components/ui/button";
 import Score from "./Score";
 import Map from "./Map";
 import History from "./History";
@@ -22,6 +22,7 @@ export default function Results({
   latLon: { lat: string; lon: string } | null;
   popularAddresses: PopularAddress[];
 }) {
+  const [isCopied, setIsCopied] = useState(false);
   // only call if lat and lon are defined
   const { data, error, isLoading } = useSWR(latLon?.lat ? `/api/scores?lat=${latLon?.lat}&lon=${latLon?.lon}` : null, fetcher);
  
@@ -32,6 +33,20 @@ export default function Results({
           <Score type="walking" score={data?.walkingScore} />
           <Score type="driving" score={data?.drivingScore} />
           <Score type="urban" score={data?.urbanIndex} />
+          <Button variant="ghost" 
+            disabled={!latLon?.lat || !latLon?.lon}
+            onClick={() => {
+              if (navigator === undefined || navigator.clipboard === undefined) {
+                return;
+              }
+              navigator.clipboard.writeText(`${window.location.origin}/?lat=${latLon?.lat}&lon=${latLon?.lon}`);
+              setIsCopied(true);
+              setTimeout(() => {
+                setIsCopied(false);
+              }, 2000);
+            }}>
+            {isCopied ? "Copied! 📋" : "Share URL 🔗"}
+          </Button>
         </div>    
 
         <div className="touch-none order-1 lg:order-2 col-span-1 lg:col-span-4 flex items-start justify-center">
