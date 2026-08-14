@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 
 import useSWR from "swr";
-import { LocationIQAutocompleteResponse, LocationIQAutocomplete } from "@/app/types";
+import { LocationIQAutocomplete } from "@/app/types";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -31,6 +31,16 @@ const AddressList = ({ query, setLatLon, setAddress, onSelect }: { query: string
     router.replace(`/?${params.toString()}`);
     setLatLon({lat: item.lat, lon: item.lon});
     setAddress(item.display_name);
+
+    // store search in local storage
+    const recentSearches = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+    // avoid duplicates
+    if (!recentSearches.some((search: {display_name: string, lat: string, lon: string}) => search.display_name === item.display_name)) {
+      const newRecentSearches = [...recentSearches, {display_name: item.display_name, lat: item.lat, lon: item.lon}];
+      localStorage.setItem("searchHistory", JSON.stringify(newRecentSearches));
+      window.dispatchEvent(new Event("search-history-updated"));
+    }
+    
     onSelect();
   }
 
@@ -65,8 +75,8 @@ interface AddressProps {
 
 export default function Address({ setLatLon, initialLat, initialLon, initialAddress }: AddressProps) {
   const [address, setAddress] = useState<string>(initialAddress || "");
-  const [showList, setShowList] = useState(true);
-
+  const [showList, setShowList] = useState(!(initialAddress || (initialLat && initialLon)));
+  
   return (
     <div className="w-full max-w-2xl">
       <ButtonGroup className="w-full">

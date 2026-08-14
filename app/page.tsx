@@ -16,7 +16,7 @@ export default async function Page({ searchParams }: {
   return (
     <div className="flex flex-col items-center justify-center p-2 lg:p-8">
       <h1 className="text-4xl font-bold">Address Insights</h1>
-      <Home initialLat={initialLat} initialLon={initialLon} initialAddress={initialAddress?.display_name} />
+      <Home key={`home-${initialLat}-${initialLon}`} initialLat={initialLat} initialLon={initialLon} initialAddress={initialAddress?.display_name} />
     </div>
   );
 }

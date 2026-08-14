@@ -1,36 +1,41 @@
 "use client"
 
-import { useState } from "react";
 import { Suspense } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import useSWR from "swr";
+
+
 import Score from "./Score";
 import Map from "./Map";
-import useSWR from "swr";
+import History from "./History";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Results({latLon}: {latLon: {lat: string, lon: string} | null}) {
   // only call if lat and lon are defined
-  const { data, error, isLoading } = useSWR(latLon ? `/api/scores?lat=${latLon?.lat}&lon=${latLon?.lon}` : null, fetcher);
-
+  const { data, error, isLoading } = useSWR(latLon?.lat ? `/api/scores?lat=${latLon?.lat}&lon=${latLon?.lon}` : null, fetcher);
+ 
   return (
     <Suspense fallback={<Skeleton className="size-48 animate-pulse" />}>
-      <div className="flex flex-row gap-4 items-start justify-center">
-        <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+        <div className="order-2 lg:order-1 flex flex-col items-center gap-4">
           <Score type="walking" score={data?.walkingScore} />
           <Score type="driving" score={data?.drivingScore} />
           <Score type="urban" score={data?.urbanIndex} />
         </div>    
-        
-            
-        <div className="items-start justify-center flex">
-        {latLon?.lat && latLon?.lon && (
-          <Map key={`${latLon.lat}-${latLon.lon}`} lat={latLon.lat} lon={latLon.lon} />
-        )}
-        {!latLon?.lat && !latLon?.lon && (
-          <div className="w-150 h-100 bg-gray-100 rounded-lg"/>
-        )}
+
+        <div className="order-1 lg:order-2 col-span-1 lg:col-span-4 flex items-start justify-center">
+          {latLon?.lat && latLon?.lon && (
+            <Map key={`${latLon.lat}-${latLon.lon}`} lat={latLon.lat} lon={latLon.lon} walkingAmenities={data?.walkingAmenities} drivingAmenities={data?.drivingAmenities} />
+          )}
+          {!latLon?.lat && !latLon?.lon && (
+            <div className="w-150 h-100 bg-gray-100 rounded-lg"/>
+          )}
+        </div>     
+
+        <div className="order-3 lg:order-3 flex flex-col gap-2">
+          <History />
         </div>
       </div>
     </Suspense>

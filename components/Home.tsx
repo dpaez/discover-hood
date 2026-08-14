@@ -24,7 +24,7 @@ export default function Home({
 
   return (
     <SWRConfig value={{ provider: () => new Map() }}>
-      <main className="flex flex-1 w-full max-w-7xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black ">
+      <main className="flex flex-1 gap-4 lg:gap-8 w-full max-w-7xl flex-col items-center justify-between p-16 bg-white dark:bg-black ">
         <Address
           setLatLon={setLatLon}
           initialLat={initialLat}

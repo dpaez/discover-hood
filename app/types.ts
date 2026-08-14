@@ -1,3 +1,5 @@
+
+
 export type LocationIQAddress = {
   attraction?: string;
   house_number?: string;
@@ -35,3 +37,20 @@ export type LocationIQReverseResponse = {
   display_name: string;
   address: LocationIQAddress;
 };
+
+export type NearbyResponse = {
+  place_id: string;
+  osm_type: string;
+  osm_id: string;
+  licence?: string;
+  lat: string;
+  lon: string;
+  class: string;
+  type: string;
+  tag_type: string;
+  name: string;
+  display_name: string;
+  address: LocationIQAddress;
+  boundingbox: [string, string, string, string];
+  distance: number;
+} 
