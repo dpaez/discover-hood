@@ -9,6 +9,7 @@ import useSWR from "swr";
 import Score from "./Score";
 import Map from "./Map";
 import History from "./History";
+import PopularAddresses from "./PopularAddresses";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -25,7 +26,7 @@ export default function Results({latLon}: {latLon: {lat: string, lon: string} | 
           <Score type="urban" score={data?.urbanIndex} />
         </div>    
 
-        <div className="order-1 lg:order-2 col-span-1 lg:col-span-4 flex items-start justify-center">
+        <div className="touch-none order-1 lg:order-2 col-span-1 lg:col-span-4 flex items-start justify-center">
           {latLon?.lat && latLon?.lon && (
             <Map key={`${latLon.lat}-${latLon.lon}`} lat={latLon.lat} lon={latLon.lon} walkingAmenities={data?.walkingAmenities} drivingAmenities={data?.drivingAmenities} />
           )}
@@ -34,8 +35,9 @@ export default function Results({latLon}: {latLon: {lat: string, lon: string} | 
           )}
         </div>     
 
-        <div className="order-3 lg:order-3 flex flex-col gap-2">
+        <div className="order-3 lg:order-3 flex flex-col gap-6">
           <History />
+          <PopularAddresses />
         </div>
       </div>
     </Suspense>

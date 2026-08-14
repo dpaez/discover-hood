@@ -19,7 +19,6 @@ const AddressList = ({ query, setLatLon, setAddress, onSelect }: { query: string
   const {
     data = [],
     error,
-    isLoading,
   } = useSWR(
     query.length > 3 ? `/api/latlon?address=${encodeURIComponent(query)}` : null,
     fetcher
@@ -35,14 +34,20 @@ const AddressList = ({ query, setLatLon, setAddress, onSelect }: { query: string
     setLatLon({lat: item.lat, lon: item.lon});
     setAddress(item.display_name);
 
-    // store search in local storage
-    const recentSearches = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-    // avoid duplicates
-    if (!recentSearches.some((search: {display_name: string, lat: string, lon: string}) => search.display_name === item.display_name)) {
-      const newRecentSearches = [...recentSearches, {display_name: item.display_name, lat: item.lat, lon: item.lon}];
-      localStorage.setItem("searchHistory", JSON.stringify(newRecentSearches));
-      window.dispatchEvent(new Event("search-history-updated"));
-    }
+    // store search in local storage (newest first, max 5)
+    const MAX_RECENT = 5;
+    const recentSearches = JSON.parse(
+      localStorage.getItem("searchHistory") || "[]",
+    ) as { display_name: string; lat: string; lon: string }[];
+    const withoutDup = recentSearches.filter(
+      (s) => s.display_name !== item.display_name,
+    );
+    const next = [
+      { display_name: item.display_name, lat: item.lat, lon: item.lon },
+      ...withoutDup,
+    ].slice(0, MAX_RECENT);
+    localStorage.setItem("searchHistory", JSON.stringify(next));
+    window.dispatchEvent(new Event("search-history-updated"));
     
     onSelect();
   }

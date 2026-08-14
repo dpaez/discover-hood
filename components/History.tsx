@@ -25,27 +25,26 @@ export default function History() {
   );
 
   const searchHistory = useMemo(
-    () => JSON.parse(rawHistory) as SearchEntry[],
+    () => (JSON.parse(rawHistory) as SearchEntry[]).slice(0, 5),
     [rawHistory],
   );
 
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-lg font-bold">Recent Lookups</h3>
-      <ul className="list-none">
+      <ul className="list-none flex flex-col gap-2">
         {searchHistory.map((search) => (
           <li
             key={`${search.lat}-${search.lon}`}
-            className="text-sm flex items-center gap-2 overflow-hidden"
+            className="flex items-center gap-2 overflow-hidden"
           > 
-            <LinkIcon className="stroke-olive-500 size-12" />
             <Link
-              className="hover:text-blue-500 truncate cursor-pointer"
+              className="text-sm hover:text-blue-500 truncate cursor-pointer"
               href={`/?lat=${search.lat}&lon=${search.lon}`}
             >
               {search.display_name}
             </Link>
-            <Button variant="ghost" size="icon" onClick={() => {
+            <Button className="cursor-pointer" variant="ghost" size="icon-xs" onClick={() => {
               const newHistory = searchHistory.filter(
                 (s) => !(s.lat === search.lat && s.lon === search.lon),
               );
