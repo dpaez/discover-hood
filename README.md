@@ -5,7 +5,7 @@ ___
 
 ## Check it out
 
-Visit: https://discover-hood.vercel.app/
+Visit: [discover-hood.vercel.app](https://discover-hood.vercel.app/) 
 
 ## Work done
 
@@ -25,14 +25,27 @@ After this point all the basic features were working, the integration with the g
 
 Another useful improvement with AI was to review and audit `a11y`. This was particularly important for the Address.tsx, History.tsx and PopularLocations.tsx components. 
 
+## The stack
+- Next16
+- React 19
+- TailwindCSS
+- Shadcn
+- SWR
+- maplibre-gl
+
+## Some caveats
+
+- Testing Next API (Backend-for-frontend): Initially I wanted to use vitest to add some unit tests but almost immediately noticed that you need something more specific because next machinery is in the middle of it. After checking the docs, the Next team recommends E2E tests at this moment. I ended up adding playwright. I think this is something to revisit with more time.
+- Rate Limiting: Similarly to the testing scenario. I wanted to add some rate-limit library for next and found that with the recent upgrade to next16 there aren't many solid options. So I decide to delegate the creation of a simple in-memory rate limiting tool to the agent. Again, something to revisit with more time.
+
 ## Development
 
-- Install everything. The project is using pnpm.
+- Clone and install. The project is using pnpm.
 
 ```bash
 pnpm i
 ```
-- Then you can run the dev server
+- Then, run the dev server
 ```bash
 pnpm run dev
 ```
