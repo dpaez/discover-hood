@@ -1,17 +1,14 @@
-import { checkRateLimit } from '@/lib/rate-limit'
-import { NextResponse } from 'next/server';
-import { NearbyResponse } from '@/app/types';
+import { checkRateLimit } from "@/lib/rate-limit";
+import { CACHE_CONTROL, nearby } from "@/lib/locationiq";
+import { NearbyResponse } from "@/app/types";
 
-const nearbyAPIEndpoint = (lat: number, lon: number, radius: number, accessToken: string) => `https://us1.locationiq.com/v1/nearby?key=${accessToken}&lat=${lat}&lon=${lon}&tag=all&radius=${radius}&format=json&limit=50&dedupe=1`
-
-const WALKING_RADIUS = 200; // radius is in meters
-const DRIVING_RADIUS = 1000; // radius is in meters - weird values but locationIQ seems to be using a distance with a different unit metric
-
-
+const WALKING_RADIUS = 800; // radius is in meters
+const DRIVING_RADIUS = 8000; // radius is in meters - weird values but locationIQ seems to be using a distance with a different unit metric
+const USE_MOCK_NEARBY = process.env.USE_MOCK_NEARBY === "true";
 
 export interface ScoreResponse {
   walkingScore: number;
-  walkingAmenities: NearbyResponse[]; 
+  walkingAmenities: NearbyResponse[];
   drivingScore: number;
   drivingAmenities: NearbyResponse[];
   urbanIndex: number;
@@ -81,12 +78,6 @@ const getWalkingScore = (walkingData: NearbyResponse[]) => {
     walkingWeighted: weighted,
   };
 };
-
-const mockedNextResponse = (status: number, body: any) => {
-  return NextResponse.json(body, {
-    status,
-  });
-}
 
 const mockWalkingData: NearbyResponse[] = [
   {
@@ -1989,7 +1980,7 @@ const getUrbanIndex = (
 };
 
 export async function GET(request: Request) {
-  const { rateLimited, resetAt } = await checkRateLimit(request)
+  const { rateLimited, resetAt } = checkRateLimit(request);
   if (rateLimited) {
     return Response.json(
       { error: "Too many requests" },
@@ -2009,52 +2000,59 @@ export async function GET(request: Request) {
   if (!lat || !lon) {
     return Response.json({ error: "Lat and lon are required" }, { status: 400 });
   }
-  
+
   const accessToken = process.env.GEOLOCATIONIQ_ACCESS_TOKEN;
   if (!accessToken) {
-    return Response.json({ error: "Access token is required" }, { status: 400 });
+    return Response.json(
+      { error: "Access token is required" },
+      { status: 400 },
+    );
   }
 
   const parsedLat = parseFloat(lat);
   const parsedLon = parseFloat(lon);
   if (isNaN(parsedLat) || isNaN(parsedLon)) {
-    return Response.json({ error: "Lat and lon must be valid numbers" }, { status: 400 });
-  }
-  
-  // fetch nearby amenities sequentially since the API has a rate limit
-  const walkingResponse = await Promise.resolve(mockedNextResponse(200, mockWalkingData)) // await fetch(nearbyAPIEndpoint(parsedLat, parsedLon, WALKING_RADIUS, accessToken), { cache: 'force-cache' })
-  const drivingResponse = await Promise.resolve(mockedNextResponse(200, mockDrivingData)) // await fetch(nearbyAPIEndpoint(parsedLat, parsedLon, DRIVING_RADIUS, accessToken), { cache: 'force-cache' })
-
-  if (walkingResponse.status === 404 || drivingResponse.status === 404) {
-    return {walkingScore: null, drivingScore: null, urbanIndex: null, walkingAmenities: [], drivingAmenities: []};
-  }
-  // check if the response is ok
-  if (!walkingResponse.ok || !drivingResponse.ok) {
-    const walkingBody = await walkingResponse.text();
-    const drivingBody = await drivingResponse.text();
-    console.error({
-      walking: { status: walkingResponse.status, body: walkingBody },
-      driving: { status: drivingResponse.status, body: drivingBody },
-    });
-    
     return Response.json(
-      {
-        error: "Failed to fetch data",
-        walkingStatus: walkingResponse.status,
-        drivingStatus: drivingResponse.status,
-        walkingBody,
-        drivingBody,
-      },
-      { status: 502 },
+      { error: "Lat and lon must be valid numbers" },
+      { status: 400 },
     );
-
   }
 
-  const [walkingData, drivingData] = await Promise.all([
-    walkingResponse.json(),
-    drivingResponse.json()
-  ]);
+  let walkingData: NearbyResponse[];
+  let drivingData: NearbyResponse[];
 
+  if (USE_MOCK_NEARBY) {
+    walkingData = mockWalkingData;
+    drivingData = mockDrivingData;
+  } else {
+    // Sequential to respect LocationIQ rate limits; each call is fetch-cached for 1h
+    const walkingResult = await nearby(parsedLat, parsedLon, WALKING_RADIUS);
+    // LocationIQ free tier is often ~2 req/s; space the second nearby call
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    const drivingResult = await nearby(parsedLat, parsedLon, DRIVING_RADIUS);
+
+    if (!Array.isArray(walkingResult) || !Array.isArray(drivingResult)) {
+      const walkingError = Array.isArray(walkingResult)
+        ? undefined
+        : walkingResult;
+      const drivingError = Array.isArray(drivingResult)
+        ? undefined
+        : drivingResult;
+      return Response.json(
+        {
+          error: "Failed to fetch data",
+          walkingStatus: walkingError?.status,
+          drivingStatus: drivingError?.status,
+          walkingBody: walkingError?.error,
+          drivingBody: drivingError?.error,
+        },
+        { status: 502 },
+      );
+    }
+
+    walkingData = walkingResult;
+    drivingData = drivingResult;
+  }
 
   const { walkingScore, walkingAmenities } = getWalkingScore(walkingData);
   const { drivingScore, drivingAmenities } = getDrivingScore(drivingData);
@@ -2065,12 +2063,17 @@ export async function GET(request: Request) {
     drivingAmenities,
   );
 
-  return Response.json({
-    walkingScore,
-    drivingScore,
-    urbanIndex,
-    walkingAmenities,
-    drivingAmenities,
-  });
+  return Response.json(
+    {
+      walkingScore,
+      drivingScore,
+      urbanIndex,
+      walkingAmenities,
+      drivingAmenities,
+    },
+    {
+      headers: { "Cache-Control": CACHE_CONTROL.scores },
+    },
+  );
 }
 

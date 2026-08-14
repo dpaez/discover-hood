@@ -23,8 +23,14 @@ export default function Home({
   );
 
   return (
-    <SWRConfig value={{ provider: () => new Map() }}>
-      <main className="flex flex-1 gap-4 lg:gap-8 w-full max-w-7xl flex-col items-center justify-between p-16 bg-white dark:bg-black ">
+    <SWRConfig
+      value={{
+        provider: () => new Map(),
+        revalidateOnFocus: false,
+        dedupingInterval: 60_000,
+      }}
+    >
+      <main className="flex flex-1 gap-4 lg:gap-8 w-full max-w-7xl flex-col items-center justify-between  lg:p-16 p-4 bg-white dark:bg-black ">
         <Address
           setLatLon={setLatLon}
           initialLat={initialLat}

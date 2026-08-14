@@ -1,6 +1,7 @@
 
 
 export type LocationIQAddress = {
+  name?: string;
   attraction?: string;
   house_number?: string;
   road?: string;
@@ -48,7 +49,7 @@ export type NearbyResponse = {
   class: string;
   type: string;
   tag_type: string;
-  name: string;
+  name?: string;
   display_name: string;
   address: LocationIQAddress;
   boundingbox: [string, string, string, string];

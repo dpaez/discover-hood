@@ -57,7 +57,7 @@ export default function Map({ lat, lon, walkingAmenities = [], drivingAmenities 
         latitude: parseFloat(lat),
         zoom: 14,
       }}
-      style={{ width: 600, height: 400 }}
+      style={{ width: 800, height: 600, borderRadius: 10 }}
       mapStyle={`https://tiles.locationiq.com/v3/streets/vector.json?key=${process.env.NEXT_PUBLIC_MAPTILER_ACCESS_TOKEN}`}
     >
       {markers}

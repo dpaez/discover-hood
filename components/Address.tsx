@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 
 import useSWR from "swr";
 import { LocationIQAutocomplete } from "@/app/types";
+import { Search } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -79,10 +82,12 @@ export default function Address({ setLatLon, initialLat, initialLon, initialAddr
   
   return (
     <div className="w-full max-w-2xl">
-      <ButtonGroup className="w-full">
-        <Input id="input-button-group" value={address} onChange={(e) => { setShowList(true); setAddress(e.target.value)} } placeholder="Enter your address..." />
-        <Button variant="outline">Search</Button>
-      </ButtonGroup>
+      <InputGroup className="w-full">
+        <InputGroupInput id="address-input" value={address} onChange={(e) => { setShowList(true); setAddress(e.target.value)} } placeholder="Discover the neighbourhood..." />
+        <InputGroupAddon>
+          <Search />
+        </InputGroupAddon>
+      </InputGroup>
       
       {showList && <AddressList 
         setAddress={setAddress} 
